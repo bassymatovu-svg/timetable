@@ -246,7 +246,7 @@ export function GeneratorPage({ onNavigateToGrid }: { onNavigateToGrid?: () => v
                   <strong>{(result.durationMs / 1000).toFixed(2)} seconds</strong> with{" "}
                   <strong>0 hard violations</strong>.
                 </p>
-                {result.log?.softBreakdown && (
+                {result.log?.softBreakdown && typeof result.log.softBreakdown === 'object' ? (
                   <div className="flex flex-wrap gap-2 mt-2">
                     {Object.entries(result.log.softBreakdown as Record<string, number>).map(
                       ([key, score]) => (
@@ -254,12 +254,12 @@ export function GeneratorPage({ onNavigateToGrid }: { onNavigateToGrid?: () => v
                           key={key}
                           className="px-2 py-0.5 bg-white border border-slate-200 rounded text-[10px] text-slate-600"
                         >
-                          {key.replace(/_/g, " ")}: <strong>{score}</strong>
+                          {key.replace(/_/g, " ")}: <strong>{score as number}</strong>
                         </span>
                       )
                     )}
                   </div>
-                )}
+                ) : null}
               </div>
             </div>
 

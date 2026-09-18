@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
+const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+
 export function SubstitutionManager() {
   const {
     currentInstitutionId,
