@@ -197,3 +197,41 @@ export interface AuditLog {
   diff: Record<string, unknown> | null
   created_at: string
 }
+
+export type AssessmentType = "exam" | "test"
+export type AssessmentStatus = "draft" | "scheduled" | "completed" | "cancelled"
+
+export interface AssessmentSession {
+  id: string
+  institution_id: string
+  term_id: string
+  type: AssessmentType
+  title: string
+  subject_id: string
+  class_group_ids: string[]
+  date: string // YYYY-MM-DD
+  start_time: string // HH:mm
+  duration_minutes: number
+  end_time: string // HH:mm
+  room_ids: string[]
+  supervisor_ids: string[]
+  chief_supervisor_id?: string | null
+  instructions?: string | null
+  status: AssessmentStatus
+  created_at: string
+  // Populated fields for UI convenience
+  subject?: Subject
+  class_groups?: ClassGroup[]
+  rooms?: Room[]
+  supervisors?: (Teacher & { profile?: Profile })[]
+  chief_supervisor?: (Teacher & { profile?: Profile }) | null
+}
+
+export interface AssessmentConflict {
+  type: "room_clash" | "supervisor_clash" | "capacity_exceeded" | "teacher_unavailable"
+  severity: "error" | "warning"
+  message: string
+  entityId?: string
+  entityName?: string
+}
+

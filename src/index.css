@@ -76,35 +76,111 @@ body {
 }
 
 /* Print Stylesheet */
+@page {
+  size: landscape;
+  margin: 8mm 10mm;
+}
+
 @media print {
+  html,
   body {
     background: white !important;
-    color: black !important;
-    font-size: 9pt;
+    color: #0f172a !important;
+    font-size: 8.5pt !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
+  /* Reset layout constraints from fixed-viewport app shells and containers */
+  #root,
+  body > div,
+  .app-shell,
+  main,
+  div[class*="overflow-"],
+  div[class*="h-screen"],
+  div[class*="w-screen"],
+  div[class*="max-w-"] {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    position: static !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+  }
+
+  /* Completely eradicate scrollbars from printing */
+  * {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    box-shadow: none !important;
+  }
+  *::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  /* Elements to completely hide in print */
   .no-print,
   nav,
   aside,
   header,
   button,
+  input,
+  select,
+  [role="combobox"],
+  [role="dialog"],
   .print-hidden {
     display: none !important;
   }
 
-  .print-only {
+  /* Elements only visible during printing */
+  .print-only,
+  .print\:flex {
+    display: flex !important;
+  }
+  .print\:block {
     display: block !important;
   }
 
+  /* Master Table Grid print optimization */
+  table,
   .timetable-grid-print {
     width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
     border-collapse: collapse !important;
     page-break-inside: avoid;
+    break-inside: avoid;
+    margin: 0 auto !important;
   }
 
+  table th,
+  table td,
   .timetable-grid-print th,
   .timetable-grid-print td {
     border: 1px solid #94a3b8 !important;
-    padding: 4px !important;
+    padding: 4px 6px !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    word-break: break-word;
+  }
+
+  /* Force background colors and borders to print accurately */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
+

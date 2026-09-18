@@ -88,7 +88,8 @@ export function downloadGridAsExcel({
 
 /**
  * 2. Download Master Timetable Grid as Word Document (.doc)
- * Generates an MSOffice-compliant HTML/XML document that opens cleanly in MS Word and Google Docs.
+ * Generates an MSOffice-compliant Landscape XML/HTML document that opens
+ * cleanly, centered, and fully scaled in Microsoft Word and Google Docs.
  */
 export function downloadGridAsWord({
   title,
@@ -110,49 +111,78 @@ export function downloadGridAsWord({
     (a, b) => a - b
   )
 
+  const dayColWidth = 11 // 11%
+  const periodColWidth = ((100 - dayColWidth) / Math.max(1, periodNumbers.length)).toFixed(2)
+
+  let colgroupHtml = `<colgroup><col style="width: ${dayColWidth}%;" />`
+  for (let i = 0; i < periodNumbers.length; i++) {
+    colgroupHtml += `<col style="width: ${periodColWidth}%;" />`
+  }
+  colgroupHtml += `</colgroup>`
+
   let tableHtml = `
-    <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; width: 100%; font-family: Calibri, sans-serif; font-size: 11pt; border: 1px solid #94a3b8;">
+    <table align="center" border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: 100%; max-width: 100%; margin-left: auto; margin-right: auto; table-layout: fixed; font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 8.5pt; border: 1.5px solid #0f172a;">
+      ${colgroupHtml}
       <thead>
-        <tr style="background-color: #f1f5f9; text-align: center;">
-          <th style="padding: 8px; width: 100px; text-align: left;">Day / Slot</th>
+        <tr style="background-color: #1e3a8a; color: #ffffff; text-align: center;">
+          <th style="padding: 8px 4px; background-color: #1e3a8a; color: #ffffff; font-size: 9pt; font-weight: bold; border: 1px solid #334155; text-align: center; vertical-align: middle;">
+            Day / Period
+          </th>
   `
 
   for (const pNum of periodNumbers) {
     const p = periods.find((period) => period.period_number === pNum)
+    const isBreak = p?.is_break
     tableHtml += `
-      <th style="padding: 8px; ${p?.is_break ? "background-color: #fef3c7;" : ""}">
-        <strong>Period ${pNum}</strong><br/>
-        <span style="font-size: 9pt; color: #64748b;">${p?.start_time.substring(0, 5)} - ${p?.end_time.substring(0, 5)}</span>
+      <th style="padding: 6px 3px; background-color: ${isBreak ? "#78350f" : "#1e3a8a"}; color: #ffffff; border: 1px solid #334155; text-align: center; vertical-align: middle;">
+        <div style="font-size: 9pt; font-weight: bold; color: #ffffff;">Period ${pNum}</div>
+        <div style="font-size: 7.5pt; color: #cbd5e1; margin-top: 1px; font-weight: normal;">
+          ${p?.start_time.substring(0, 5)} - ${p?.end_time.substring(0, 5)}
+        </div>
       </th>
     `
   }
   tableHtml += `</tr></thead><tbody>`
 
   for (let dayIdx = 1; dayIdx <= 5; dayIdx++) {
-    tableHtml += `<tr><td style="padding: 8px; font-weight: bold; background-color: #f8fafc;">${DAY_NAMES[dayIdx - 1]}</td>`
+    tableHtml += `
+      <tr style="page-break-inside: avoid;">
+        <td style="padding: 6px 4px; font-weight: bold; font-size: 9pt; background-color: #f8fafc; color: #0f172a; text-align: center; vertical-align: middle; border: 1px solid #94a3b8;">
+          ${DAY_NAMES[dayIdx - 1]}
+        </td>
+    `
 
     for (const pNum of periodNumbers) {
       const p = periods.find((period) => period.day_of_week === dayIdx && period.period_number === pNum)
 
       if (p?.is_break) {
-        tableHtml += `<td style="padding: 8px; text-align: center; background-color: #fffbeb; color: #b45309; font-style: italic;">Break</td>`
+        tableHtml += `
+          <td style="padding: 6px 2px; text-align: center; background-color: #fef3c7; color: #92400e; font-size: 8pt; font-weight: bold; vertical-align: middle; border: 1px solid #cbd5e1;">
+            BREAK
+          </td>
+        `
       } else if (p) {
         const cellLessons = lessons.filter((l) => l.period_id === p.id)
         if (cellLessons.length === 0) {
-          tableHtml += `<td style="padding: 8px; text-align: center; color: #cbd5e1;">—</td>`
+          tableHtml += `
+            <td style="padding: 6px 2px; text-align: center; color: #cbd5e1; font-size: 9pt; background-color: #ffffff; vertical-align: middle; border: 1px solid #e2e8f0;">
+              &mdash;
+            </td>
+          `
         } else {
-          tableHtml += `<td style="padding: 8px; vertical-align: top;">`
+          tableHtml += `<td style="padding: 4px; vertical-align: top; background-color: #ffffff; border: 1px solid #cbd5e1;">`
           for (const l of cellLessons) {
             const s = subjectMap.get(l.subject_id)
             const r = roomMap.get(l.room_id)
             const c = classMap.get(l.class_group_id)
             const prof = profileMap.get(l.teacher_id)
+            const borderCol = s?.color || "#1D4ED8"
 
             tableHtml += `
-              <div style="margin-bottom: 4px; border-left: 3px solid ${s?.color || "#1D4ED8"}; padding-left: 4px;">
-                <strong style="color: #0f172a;">${s?.name || "Subject"} (${s?.code || ""})</strong><br/>
-                <span style="font-size: 9.5pt; color: #334155;">${c?.name || "Class"} &bull; ${r?.name || "Room"}</span><br/>
-                <span style="font-size: 9pt; color: #64748b;">${prof?.full_name || "Faculty"}</span>
+              <div style="margin-bottom: 3px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 3.5px solid ${borderCol}; padding: 3px 4px; text-align: left;">
+                <div style="font-weight: bold; font-size: 8.5pt; color: #0f172a; line-height: 1.1;">${s?.code || "SUBJ"} <span style="font-weight: normal; color: #475569; font-size: 7.5pt;">(${s?.name || ""})</span></div>
+                <div style="font-size: 7.5pt; font-weight: 600; color: #1e293b; margin-top: 1.5px;">${c?.name || "Class"} &bull; ${r?.name || "Room"}</div>
+                <div style="font-size: 7pt; color: #64748b; margin-top: 1px;">${prof?.full_name || "Faculty"}</div>
               </div>
             `
           }
@@ -166,22 +196,63 @@ export function downloadGridAsWord({
   tableHtml += `</tbody></table>`
 
   const docContent = `
-    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+    <html xmlns:o='urn:schemas-microsoft-com:office:office'
+          xmlns:w='urn:schemas-microsoft-com:office:word'
+          xmlns='http://www.w3.org/TR/REC-html40'>
     <head>
       <meta charset="utf-8">
       <title>${title}</title>
+      <!--[if gte mso 9]>
+      <xml>
+        <w:WordDocument>
+          <w:View>Print</w:View>
+          <w:Zoom>100</w:Zoom>
+          <w:DoNotOptimizeForBrowser/>
+        </w:WordDocument>
+      </xml>
+      <![endif]-->
       <style>
-        body { font-family: Calibri, Arial, sans-serif; margin: 20px; }
-        h1 { color: #1D4ED8; font-size: 18pt; margin-bottom: 2px; }
-        h2 { color: #0f172a; font-size: 14pt; margin-top: 0; margin-bottom: 4px; }
-        p { color: #64748b; font-size: 10pt; margin-top: 0; margin-bottom: 16px; }
+        @page Section1 {
+          size: 11.69in 8.27in;
+          mso-page-orientation: landscape;
+          margin: 0.4in 0.4in 0.4in 0.4in;
+          mso-header-margin: 0.25in;
+          mso-footer-margin: 0.25in;
+        }
+        div.Section1 {
+          page: Section1;
+          width: 100%;
+          margin: 0 auto;
+        }
+        body {
+          font-family: 'Segoe UI', Calibri, Arial, sans-serif;
+          margin: 0;
+          padding: 0;
+          background-color: #ffffff;
+        }
       </style>
     </head>
     <body>
-      <h1>${institutionName}</h1>
-      <h2>${title}</h2>
-      <p>${subtitle} &bull; Generated on ${new Date().toLocaleDateString()}</p>
-      ${tableHtml}
+      <div class="Section1">
+        <!-- Institutional Header Banner -->
+        <table align="center" border="0" cellpadding="0" cellspacing="0" style="width: 100%; margin-bottom: 12px; border-bottom: 2.5px solid #1D4ED8; padding-bottom: 6px;">
+          <tr>
+            <td style="vertical-align: top; text-align: left;">
+              <div style="font-size: 10.5pt; font-weight: bold; color: #1D4ED8; text-transform: uppercase; letter-spacing: 0.5px;">${institutionName}</div>
+              <div style="font-size: 15pt; font-weight: bold; color: #0f172a; margin-top: 1px;">${title}</div>
+              <div style="font-size: 9pt; color: #475569; margin-top: 1px;">${subtitle}</div>
+            </td>
+            <td style="vertical-align: top; text-align: right;">
+              <div style="font-size: 9pt; font-weight: bold; color: #0f172a;">Official Academic Timetable</div>
+              <div style="font-size: 8pt; color: #64748b; margin-top: 2px;">Generated: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}</div>
+              <div style="font-size: 7.5pt; color: #94a3b8; margin-top: 1px;">TimetableOS Scheduler</div>
+            </td>
+          </tr>
+        </table>
+
+        <!-- Table Matrix -->
+        ${tableHtml}
+      </div>
     </body>
     </html>
   `

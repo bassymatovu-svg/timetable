@@ -14,6 +14,8 @@ interface HeaderProps {
 const VIEW_TITLES: Record<NavView, { title: string; subtitle: string }> = {
   dashboard: { title: "Operations Dashboard", subtitle: "High-level overview of scheduling health & substitutions" },
   master_grid: { title: "Master Timetable Grid", subtitle: "Interactive drag-and-drop grid with real-time constraint validation" },
+  exam_timetable: { title: "Exam Timetable & Room Booking", subtitle: "Summative exam scheduling, room capacity verification, and supervisor duty assignments" },
+  test_timetable: { title: "Test Timetable & Continuous Assessment", subtitle: "Periodic tests, quizzes, duration settings, and supervising teacher allocations" },
   generator: { title: "Algorithmic Timetable Generator", subtitle: "Deterministic constraint-satisfaction and local search engine" },
   individual_views: { title: "Personal & Class Timetables", subtitle: "Teacher, class group, and room-specific weekly schedules" },
   substitutions: { title: "Teacher Substitution Management", subtitle: "Absence logging and intelligent substitute ranking" },
@@ -68,7 +70,7 @@ export function Header({ currentView }: HeaderProps) {
           className="text-[10px] py-0 px-2 font-normal hidden lg:flex items-center gap-1"
         >
           <Database className="w-2.5 h-2.5" />
-          {isSupabaseConfigured ? "Supabase Cloud" : "Local Engine"}
+          {isSupabaseConfigured ? "TimetableOS Cloud" : "TimetableOS Local"}
         </Badge>
 
         {/* Role Switcher */}

@@ -1,6 +1,7 @@
 import React from "react"
 import { AppShell } from "./components/layout/AppShell"
 import { MasterGrid } from "./features/timetable/MasterGrid"
+import { AssessmentManager } from "./features/assessments/AssessmentManager"
 import { GeneratorPage } from "./features/generator/GeneratorPage"
 import { IndividualTimetableView } from "./features/timetable/IndividualTimetableView"
 import { SubstitutionManager } from "./features/substitutions/SubstitutionManager"
@@ -25,6 +26,10 @@ export function App() {
         switch (currentView) {
           case "master_grid":
             return <MasterGrid />
+          case "exam_timetable":
+            return <AssessmentManager defaultType="exam" />
+          case "test_timetable":
+            return <AssessmentManager defaultType="test" />
           case "generator":
             return <GeneratorPage onNavigateToGrid={() => setView("master_grid")} />
           case "individual_views":

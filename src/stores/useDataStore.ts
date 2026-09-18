@@ -19,6 +19,7 @@ import type {
   GenerationRun,
   AuditLog,
   UserRole,
+  AssessmentSession,
 } from "@/types/database"
 
 interface DataStoreState {
@@ -45,6 +46,7 @@ interface DataStoreState {
   substitutions: Substitution[]
   generationRuns: GenerationRun[]
   auditLogs: AuditLog[]
+  assessmentSessions: AssessmentSession[]
 
   // Actions
   switchInstitution: (institutionId: string) => void
@@ -103,6 +105,11 @@ interface DataStoreState {
   // Substitutions
   createSubstitution: (sub: Omit<Substitution, "id" | "created_at">) => Substitution
   updateSubstitution: (id: string, updates: Partial<Substitution>) => void
+
+  // Assessment Sessions (Exams & Tests)
+  addAssessmentSession: (session: Omit<AssessmentSession, "id" | "created_at">) => AssessmentSession
+  updateAssessmentSession: (id: string, updates: Partial<AssessmentSession>) => void
+  deleteAssessmentSession: (id: string) => void
 
   // Generation Runs
   addGenerationRun: (run: Omit<GenerationRun, "id">) => GenerationRun
@@ -681,6 +688,88 @@ const DEFAULT_CONSTRAINTS_CONFIG: ConstraintsConfig[] = [
   },
 ]
 
+const DEFAULT_ASSESSMENT_SESSIONS: AssessmentSession[] = [
+  {
+    id: "assess-exam-math-midterm",
+    institution_id: "00000000-0000-0000-0000-000000000001",
+    term_id: "10000000-0000-0000-0000-000000000001",
+    type: "exam",
+    title: "Fall Midterm: Mathematics Paper 1 (Calculus & Algebra)",
+    subject_id: "30000000-0000-0000-0000-000000000001", // Math
+    class_group_ids: [
+      "40000000-0000-0000-0000-000000000001", // Grade 9A
+      "40000000-0000-0000-0000-000000000002", // Grade 9B
+    ],
+    date: "2026-10-15",
+    start_time: "09:00",
+    duration_minutes: 120,
+    end_time: "11:00",
+    room_ids: ["20000000-0000-0000-0000-000000000007"], // Main Gymnasium (capacity 120)
+    supervisor_ids: ["teacher-dr-vance", "teacher-sarah-jenkins"],
+    chief_supervisor_id: "teacher-dr-vance",
+    instructions: "Scientific non-programmable calculators permitted. Formula sheets provided.",
+    status: "scheduled",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "assess-exam-phys-midterm",
+    institution_id: "00000000-0000-0000-0000-000000000001",
+    term_id: "10000000-0000-0000-0000-000000000001",
+    type: "exam",
+    title: "Fall Midterm: Physics Theory & Mechanics",
+    subject_id: "30000000-0000-0000-0000-000000000002", // Physics
+    class_group_ids: ["40000000-0000-0000-0000-000000000001"], // Grade 9A
+    date: "2026-10-16",
+    start_time: "09:30",
+    duration_minutes: 90,
+    end_time: "11:00",
+    room_ids: ["20000000-0000-0000-0000-000000000004"], // Science Lab Alpha
+    supervisor_ids: ["teacher-sarah-jenkins", "teacher-david-miller"],
+    chief_supervisor_id: "teacher-sarah-jenkins",
+    instructions: "Strict lab safety protocols apply. No smart watches allowed.",
+    status: "scheduled",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "assess-test-cs-quiz",
+    institution_id: "00000000-0000-0000-0000-000000000001",
+    term_id: "10000000-0000-0000-0000-000000000001",
+    type: "test",
+    title: "Unit 2 Practical Test: Python Data Structures",
+    subject_id: "30000000-0000-0000-0000-000000000006", // CS
+    class_group_ids: ["40000000-0000-0000-0000-000000000001"], // Grade 9A
+    date: "2026-10-21",
+    start_time: "10:00",
+    duration_minutes: 45,
+    end_time: "10:45",
+    room_ids: ["20000000-0000-0000-0000-000000000006"], // Computer Lab A
+    supervisor_ids: ["teacher-emily-zhao"],
+    chief_supervisor_id: "teacher-emily-zhao",
+    instructions: "Hands-on terminal assessment. Internet disabled during testing.",
+    status: "scheduled",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "assess-test-eng-vocab",
+    institution_id: "00000000-0000-0000-0000-000000000001",
+    term_id: "10000000-0000-0000-0000-000000000001",
+    type: "test",
+    title: "Literature Progress Test: Shakespeare & Poetry Analysis",
+    subject_id: "30000000-0000-0000-0000-000000000004", // English
+    class_group_ids: ["40000000-0000-0000-0000-000000000002"], // Grade 9B
+    date: "2026-10-22",
+    start_time: "11:35",
+    duration_minutes: 50,
+    end_time: "12:25",
+    room_ids: ["20000000-0000-0000-0000-000000000002"], // Room 102
+    supervisor_ids: ["teacher-david-miller"],
+    chief_supervisor_id: "teacher-david-miller",
+    instructions: "Closed book written test.",
+    status: "scheduled",
+    created_at: new Date().toISOString(),
+  },
+]
+
 export const useDataStore = create<DataStoreState>()(
   persist(
     (set, get) => ({
@@ -705,6 +794,7 @@ export const useDataStore = create<DataStoreState>()(
       substitutions: [],
       generationRuns: [],
       auditLogs: [],
+      assessmentSessions: DEFAULT_ASSESSMENT_SESSIONS,
 
       switchInstitution: (institutionId: string) => {
         set({ currentInstitutionId: institutionId })
@@ -1030,6 +1120,37 @@ export const useDataStore = create<DataStoreState>()(
         return newRun
       },
 
+      addAssessmentSession: (sessionData) => {
+        const newSession: AssessmentSession = {
+          ...sessionData,
+          id: crypto.randomUUID ? crypto.randomUUID() : `assess-${Date.now()}`,
+          created_at: new Date().toISOString(),
+        }
+        set((state) => ({ assessmentSessions: [...state.assessmentSessions, newSession] }))
+        get().logAction("create", "assessment_session", newSession.id, {
+          title: newSession.title,
+          type: newSession.type,
+          date: newSession.date,
+        })
+        return newSession
+      },
+
+      updateAssessmentSession: (id, updates) => {
+        set((state) => ({
+          assessmentSessions: state.assessmentSessions.map((s) =>
+            s.id === id ? { ...s, ...updates } : s
+          ),
+        }))
+        get().logAction("update", "assessment_session", id, updates)
+      },
+
+      deleteAssessmentSession: (id) => {
+        set((state) => ({
+          assessmentSessions: state.assessmentSessions.filter((s) => s.id !== id),
+        }))
+        get().logAction("delete", "assessment_session", id)
+      },
+
       logAction: (action, entity, entityId, diff) => {
         const log: AuditLog = {
           id: crypto.randomUUID ? crypto.randomUUID() : `audit-${Date.now()}`,
@@ -1161,6 +1282,7 @@ export const useDataStore = create<DataStoreState>()(
           substitutions: [],
           generationRuns: [],
           auditLogs: [],
+          assessmentSessions: DEFAULT_ASSESSMENT_SESSIONS,
         })
       },
     }),

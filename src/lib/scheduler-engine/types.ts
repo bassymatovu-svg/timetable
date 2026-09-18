@@ -49,17 +49,19 @@ export interface ScheduledLessonSlot {
   locked?: boolean
 }
 
+export interface EngineProgress {
+  phase: "expanding" | "constructive" | "optimizing" | "completed" | "failed"
+  percentage: number
+  placedCount: number
+  totalCount: number
+  hardViolations: number
+  softScore: number
+  iteration?: number
+  message: string
+}
+
 export interface EngineProgressCallback {
-  (progress: {
-    phase: "expanding" | "constructive" | "optimizing" | "completed" | "failed"
-    percentage: number
-    placedCount: number
-    totalCount: number
-    hardViolations: number
-    softScore: number
-    iteration?: number
-    message: string
-  }): void
+  (progress: EngineProgress): void
 }
 
 export interface EngineResult {

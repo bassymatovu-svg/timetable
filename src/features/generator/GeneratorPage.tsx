@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import { Play, CheckCircle2, AlertTriangle, Clock, Sliders, Check, RotateCcw, Sparkles } from "lucide-react"
 import { useDataStore } from "@/stores/useDataStore"
-import type { EngineInputData, EngineResult } from "@/lib/scheduler-engine/types"
+import type { EngineInputData, EngineResult, EngineProgress } from "@/lib/scheduler-engine/types"
 import { generateTimetable } from "@/lib/scheduler-engine"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -78,7 +78,7 @@ export function GeneratorPage({ onNavigateToGrid }: { onNavigateToGrid?: () => v
     try {
       // Direct call with responsive progress update via animation frames
       setTimeout(() => {
-        const res = generateTimetable(inputData, (prog) => {
+        const res = generateTimetable(inputData, (prog: EngineProgress) => {
           setProgress(prog)
         })
 

@@ -1,11 +1,11 @@
 import { generateTimetable } from "@/lib/scheduler-engine"
-import type { EngineInputData } from "@/lib/scheduler-engine/types"
+import type { EngineInputData, EngineProgress } from "@/lib/scheduler-engine/types"
 
 self.onmessage = (event: MessageEvent<EngineInputData>) => {
   const inputData = event.data
 
   try {
-    const result = generateTimetable(inputData, (progress) => {
+    const result = generateTimetable(inputData, (progress: EngineProgress) => {
       self.postMessage({ type: "PROGRESS", payload: progress })
     })
 

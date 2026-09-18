@@ -14,6 +14,8 @@ import {
   History,
   Clock,
   Layers,
+  GraduationCap,
+  ClipboardCheck,
 } from "lucide-react"
 import { InstitutionSwitcher } from "./InstitutionSwitcher"
 import { useDataStore } from "@/stores/useDataStore"
@@ -21,6 +23,8 @@ import { useDataStore } from "@/stores/useDataStore"
 export type NavView =
   | "dashboard"
   | "master_grid"
+  | "exam_timetable"
+  | "test_timetable"
   | "generator"
   | "individual_views"
   | "substitutions"
@@ -58,6 +62,13 @@ export function Sidebar({ currentView, onSelectView }: SidebarProps) {
         { id: "generator" as NavView, label: "Timetable Generator", icon: Play, visible: !isViewer && !isTeacher },
         { id: "substitutions" as NavView, label: "Substitution Manager", icon: UserX, visible: !isViewer },
         { id: "smart_import" as NavView, label: "Smart Import (AI)", icon: UploadCloud, visible: !isViewer && !isTeacher },
+      ],
+    },
+    {
+      title: "Assessments & Exams",
+      items: [
+        { id: "exam_timetable" as NavView, label: "Exam Timetable", icon: GraduationCap, visible: true },
+        { id: "test_timetable" as NavView, label: "Test Timetable", icon: ClipboardCheck, visible: true },
       ],
     },
     {

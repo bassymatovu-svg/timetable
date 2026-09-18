@@ -1,20 +1,22 @@
 import type { Lesson } from "@/types/database"
-import type { EngineInputData, EngineResult, EngineProgressCallback, ConstraintViolation } from "./types"
+import type {
+  EngineInputData,
+  EngineResult,
+  EngineProgressCallback,
+  ConstraintViolation,
+} from "./types"
 import { runSchedulingEngine } from "./generator"
 import {
   validateAllHardConstraints,
   type HardConstraintContext,
 } from "./validators/hard-constraints"
-import {
-  evaluateTotalSoftScore,
-  type SoftConstraintContext,
-} from "./validators/soft-constraints"
 
 export * from "./types"
 export * from "./validators/hard-constraints"
 export * from "./validators/soft-constraints"
 export * from "./requirement-expander"
 export * from "./generator"
+export * from "./assessment-validator"
 
 /**
  * Main public entrypoint for generating a complete timetable

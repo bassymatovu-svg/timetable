@@ -71,7 +71,7 @@ describe("Scheduling Engine Generator Integration", () => {
     }
 
     const progressUpdates: any[] = []
-    const result = generateTimetable(input, (p) => progressUpdates.push(p))
+    const result = generateTimetable(input, (p: any) => progressUpdates.push(p))
 
     expect(result.success).toBe(true)
     expect(result.hardViolations.length).toBe(0)

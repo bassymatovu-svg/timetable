@@ -363,6 +363,29 @@ export function MasterGrid() {
         </div>
       </div>
 
+      {/* Print-Only Institutional Letterhead Header */}
+      <div className="hidden print:flex justify-between items-start border-b-2 border-slate-900 pb-3 mb-4">
+        <div>
+          <span className="text-xs font-bold uppercase tracking-wider text-[#1D4ED8] block">
+            {currentInstitution?.name || "TimetableOS Institution"}
+          </span>
+          <h1 className="text-xl font-extrabold text-slate-900 mt-0.5">
+            {activeFilterTitle}
+          </h1>
+          <p className="text-xs text-slate-600 mt-0.5">
+            View: {filterMode === "class_group" ? "Class Cohort Timetable" : filterMode === "teacher" ? "Faculty Timetable" : "Facility Allocation"} &bull; {activeTerm?.name || "Academic Schedule"}
+          </p>
+        </div>
+        <div className="text-right">
+          <span className="text-xs font-bold text-slate-900 block">
+            Official Master Timetable
+          </span>
+          <span className="text-[10px] text-slate-500 block font-mono mt-0.5">
+            Printed {new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+          </span>
+        </div>
+      </div>
+
       {/* DndContext Wrapping the Master Timetable Grid */}
       <DndContext
         sensors={sensors}
@@ -370,8 +393,8 @@ export function MasterGrid() {
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        <div className="border border-slate-300 rounded-lg overflow-x-auto bg-white shadow-xs">
-          <table className="w-full border-collapse min-w-[900px]">
+        <div className="border border-slate-300 rounded-lg overflow-x-auto bg-white shadow-xs print:border-none print:shadow-none print:overflow-visible">
+          <table className="w-full border-collapse min-w-[900px] print:min-w-0 print:w-full print:table-fixed timetable-grid-print">
             <thead>
               <tr className="border-b border-slate-300 bg-slate-100/80">
                 <th className="p-2.5 border-r border-slate-300 w-28 text-left text-xs font-semibold text-slate-600">
@@ -559,7 +582,7 @@ function GridCell({
           <button
             type="button"
             onClick={onAddLessonClick}
-            className="w-full h-full min-h-[52px] border border-dashed border-transparent group-hover/cell:border-slate-300 rounded flex flex-col items-center justify-center text-[10px] text-slate-300 group-hover/cell:text-[#1D4ED8] group-hover/cell:bg-blue-50/30 transition-all cursor-pointer"
+            className="w-full h-full min-h-[52px] border border-dashed border-transparent group-hover/cell:border-slate-300 rounded flex flex-col items-center justify-center text-[10px] text-slate-300 group-hover/cell:text-[#1D4ED8] group-hover/cell:bg-blue-50/30 transition-all cursor-pointer print:hidden"
             title="Click to schedule a lesson in this slot"
           >
             <Plus className="w-3.5 h-3.5 mb-0.5 opacity-0 group-hover/cell:opacity-100" />
@@ -628,7 +651,7 @@ function DraggableLessonCard({
         <span className="font-bold text-[11px] text-slate-900 truncate">
           {subject?.code || "SUBJ"}
         </span>
-        <div className="flex items-center gap-0.5 opacity-80 group-hover:opacity-100">
+        <div className="flex items-center gap-0.5 opacity-80 group-hover:opacity-100 print:hidden">
           {/* Lock / Unlock button */}
           <button
             type="button"

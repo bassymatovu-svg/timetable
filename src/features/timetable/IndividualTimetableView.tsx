@@ -176,7 +176,7 @@ export function IndividualTimetableView() {
         </div>
 
         {/* Timetable Grid */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto print:overflow-visible">
           <table className="w-full border-collapse timetable-grid-print">
             <thead>
               <tr className="bg-slate-100/90 border border-slate-300">
